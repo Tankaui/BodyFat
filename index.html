@@ -11,66 +11,100 @@
             --focus-yellow: #FFD54F; /* 鵝黃色 */
             --text-dark: #333333;
             --border-light: #DDDDDD;
+            --overlay-bg: rgba(0, 0, 0, 0.5);
         }
 
-        body {
-            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+        /* 鎖死 body 與 html，禁止任何捲動 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; 
+            touch-action: none; 
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", sans-serif;
             background-color: var(--bg-beige);
             color: var(--text-dark);
-            margin: 0;
-            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
         }
 
+        /* 主容器，加入 transition 以便平滑上移 */
         .container {
             background-color: #FFFFFF;
-            padding: 30px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            width: 100%;
+            width: 90%;
             max-width: 400px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease; /* 鍵盤防擋動畫 */
         }
 
-        h1 {
-            text-align: center;
-            color: var(--primary-orange);
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
+        /* 頂部標題區與公式按鈕 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
         }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            font-size: 14px;
+        h1 {
+            color: var(--primary-orange);
+            font-size: 20px;
+            margin: 0;
         }
 
-        /* 隱藏原生數字鍵盤的上下箭頭 */
+        .formula-btn {
+            background: none;
+            border: 1px solid var(--primary-orange);
+            color: var(--primary-orange);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* 雙欄緊湊佈局 */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 年齡框佔滿整排 */
+        .full-width {
+            grid-column: 1 / -1; 
+        }
+
+        label {
+            margin-bottom: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+            -webkit-appearance: none; margin: 0; 
         }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
+        input[type=number] { -moz-appearance: textfield; }
 
         input[type="number"] {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid var(--border-light);
             border-radius: 8px;
             font-size: 16px;
             box-sizing: border-box;
-            transition: all 0.3s ease;
             outline: none;
+            text-align: center;
         }
 
         input[type="number"]:focus {
@@ -81,18 +115,18 @@
         .gender-selector {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .gender-btn {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             border: 2px solid var(--border-light);
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
+            font-size: 14px;
         }
 
         .gender-btn.active {
@@ -103,25 +137,20 @@
 
         button.calculate-btn {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background-color: var(--primary-orange);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        button.calculate-btn:hover {
-            background-color: #BF360C;
+            margin-top: 15px;
         }
 
         .result-box {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 15px;
+            padding: 15px;
             background-color: var(--focus-yellow);
             border-radius: 8px;
             text-align: center;
@@ -129,147 +158,225 @@
         }
 
         .result-box h2 {
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
             color: var(--primary-orange);
-            font-size: 36px;
+            font-size: 28px;
         }
 
         .result-box p {
             margin: 0;
-            font-size: 14px;
+            font-size: 12px;
             color: var(--text-dark);
         }
-        
-        .error-msg {
-            color: red;
+
+        /* --- 公式彈出視窗 (Modal) --- */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay-bg);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 350px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #aaa;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-content h3 {
+            color: var(--primary-orange);
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .formula-text {
             font-size: 12px;
-            margin-top: 5px;
-            display: none;
+            line-height: 1.5;
+            background-color: var(--bg-beige);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .formula-text span {
+            font-weight: bold;
+            color: var(--primary-orange);
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>體脂夾計算機</h1>
+<div class="container" id="app-container">
+    <div class="header">
+        <h1>體脂夾計算機</h1>
+        <button class="formula-btn" onclick="openModal()">查看公式</button>
+    </div>
 
     <div class="gender-selector">
         <div class="gender-btn active" onclick="setGender('male')" id="btn-male">男性</div>
         <div class="gender-btn" onclick="setGender('female')" id="btn-female">女性</div>
     </div>
 
-    <div class="form-group">
-        <label for="age">年齡 (歲)</label>
-        <input type="number" id="age" inputmode="decimal" min="0" step="1" placeholder="請輸入年齡">
-    </div>
+    <div class="input-grid">
+        <div class="form-group full-width">
+            <label for="age">年齡 (歲)</label>
+            <input type="number" id="age" inputmode="decimal" min="0" step="1" placeholder="輸入年齡">
+        </div>
 
-    <div class="form-group">
-        <label id="label-site1" for="site1">胸部皮褶 (mm)</label>
-        <input type="number" id="site1" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
-    </div>
+        <div class="form-group">
+            <label id="label-site1" for="site1">胸部 (mm)</label>
+            <input type="number" id="site1" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+        </div>
 
-    <div class="form-group">
-        <label id="label-site2" for="site2">腹部皮褶 (mm)</label>
-        <input type="number" id="site2" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
-    </div>
+        <div class="form-group">
+            <label id="label-site2" for="site2">腹部 (mm)</label>
+            <input type="number" id="site2" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+        </div>
 
-    <div class="form-group">
-        <label id="label-site3" for="site3">大腿皮褶 (mm)</label>
-        <input type="number" id="site3" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+        <div class="form-group full-width">
+            <label id="label-site3" for="site3">大腿 (mm)</label>
+            <input type="number" id="site3" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+        </div>
     </div>
-
-    <p class="error-msg" id="error-msg">請填寫所有欄位，且數值不可為負。</p>
 
     <button class="calculate-btn" onclick="calculateBodyFat()">計算體脂率</button>
 
     <div class="result-box" id="result-box">
-        <p>你的體脂肪率約為：</p>
         <h2 id="result-value">-- %</h2>
+        <p>身體密度 (BD): <span id="bd-value">--</span></p>
+    </div>
+</div>
+
+<div id="formulaModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h3>Jackson-Pollock 3點法</h3>
+        
+        <div class="formula-text">
+            <span>身體密度 (BD) - 男性：</span><br>
+            1.10938 - (0.0008267 &times; S) + (0.0000016 &times; S<sup>2</sup>) - (0.0002574 &times; Age)
+        </div>
+        
+        <div class="formula-text">
+            <span>身體密度 (BD) - 女性：</span><br>
+            1.0994921 - (0.0009929 &times; S) + (0.0000023 &times; S<sup>2</sup>) - (0.0001392 &times; Age)
+        </div>
+
+        <div class="formula-text">
+            <span>Siri 體脂率轉換公式：</span><br>
+            BF% = (4.95 / BD - 4.50) &times; 100
+        </div>
+        <p style="font-size: 11px; color: #666;">*S = 三個部位皮褶厚度總和(mm)，Age = 年齡(歲)</p>
     </div>
 </div>
 
 <script>
     let currentGender = 'male';
+    const container = document.getElementById('app-container');
 
-    // 自動全選與防呆機制
+    // 鍵盤防擋與自動全選機制
     document.querySelectorAll('input[type="number"]').forEach(input => {
         // 點擊自動全選
         input.addEventListener('focus', function() {
             this.select();
+            // 在手機螢幕上，點擊輸入框時將整個容器往上移，避免被虛擬鍵盤擋住
+            if (window.innerHeight < 700) {
+                container.style.transform = 'translateY(-15vh)';
+            }
         });
         
+        // 離開輸入框時，容器歸位
+        input.addEventListener('blur', function() {
+            container.style.transform = 'translateY(0)';
+        });
+
         // 強制阻擋負數輸入
         input.addEventListener('input', function() {
-            if (this.value < 0) {
-                this.value = 0;
-            }
+            if (this.value < 0) this.value = 0;
         });
     });
 
-    // 切換性別與測量部位
     function setGender(gender) {
         currentGender = gender;
-        
-        // 更新按鈕樣式
         document.getElementById('btn-male').classList.remove('active');
         document.getElementById('btn-female').classList.remove('active');
         document.getElementById('btn-' + gender).classList.add('active');
 
-        // 更新標籤文字
         if (gender === 'male') {
-            document.getElementById('label-site1').innerText = '胸部皮褶 (mm)';
-            document.getElementById('label-site2').innerText = '腹部皮褶 (mm)';
+            document.getElementById('label-site1').innerText = '胸部 (mm)';
+            document.getElementById('label-site2').innerText = '腹部 (mm)';
         } else {
-            document.getElementById('label-site1').innerText = '三頭肌皮褶 (mm)';
-            document.getElementById('label-site2').innerText = '髂骨上皮褶 (mm)';
+            document.getElementById('label-site1').innerText = '三頭肌 (mm)';
+            document.getElementById('label-site2').innerText = '髂骨上 (mm)';
         }
-        
-        // 隱藏結果與錯誤訊息
         document.getElementById('result-box').style.display = 'none';
-        document.getElementById('error-msg').style.display = 'none';
     }
 
-    // 計算邏輯
     function calculateBodyFat() {
         const age = parseFloat(document.getElementById('age').value);
         const site1 = parseFloat(document.getElementById('site1').value);
         const site2 = parseFloat(document.getElementById('site2').value);
         const site3 = parseFloat(document.getElementById('site3').value);
-        const errorMsg = document.getElementById('error-msg');
 
-        // 檢查是否有漏填或負數
-        if (isNaN(age) || isNaN(site1) || isNaN(site2) || isNaN(site3) || 
-            age < 0 || site1 < 0 || site2 < 0 || site3 < 0) {
-            errorMsg.style.display = 'block';
-            document.getElementById('result-box').style.display = 'none';
+        if (isNaN(age) || isNaN(site1) || isNaN(site2) || isNaN(site3)) {
+            alert("請填寫完整數值！");
             return;
         }
 
-        errorMsg.style.display = 'none';
-        
         const sum = site1 + site2 + site3;
         let bodyDensity = 0;
 
-        // Jackson-Pollock 3-site 公式
         if (currentGender === 'male') {
             bodyDensity = 1.10938 - (0.0008267 * sum) + (0.0000016 * Math.pow(sum, 2)) - (0.0002574 * age);
         } else {
             bodyDensity = 1.0994921 - (0.0009929 * sum) + (0.0000023 * Math.pow(sum, 2)) - (0.0001392 * age);
         }
 
-        // Siri 公式轉換體脂率
         let bodyFat = ((4.95 / bodyDensity) - 4.50) * 100;
         
-        // 異常值處理 (避免輸入錯誤導致計算出負數或超過100%)
         if (bodyFat < 2) bodyFat = 2.0; 
         if (bodyFat > 60) bodyFat = 60.0;
 
-        // 顯示結果
-        const resultBox = document.getElementById('result-box');
-        const resultValue = document.getElementById('result-value');
-        
-        resultValue.innerText = bodyFat.toFixed(1) + ' %';
-        resultBox.style.display = 'block';
+        document.getElementById('result-value').innerText = bodyFat.toFixed(1) + ' %';
+        document.getElementById('bd-value').innerText = bodyDensity.toFixed(4);
+        document.getElementById('result-box').style.display = 'block';
+
+        // 計算後主動移除焦點，收起手機鍵盤
+        document.activeElement.blur();
+    }
+
+    // Modal 控制
+    const modal = document.getElementById("formulaModal");
+    function openModal() {
+        modal.style.display = "flex";
+    }
+    function closeModal() {
+        modal.style.display = "none";
+    }
+    // 點擊視窗外圍也能關閉
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
     }
 </script>
 
