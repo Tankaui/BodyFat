@@ -6,15 +6,14 @@
     <title>專業體脂肪計算機 (Jackson-Pollock 3點法)</title>
     <style>
         :root {
-            --bg-beige: #FDFBF7; /* 米色 */
-            --primary-orange: #E65100; /* 夕陽橘紅色 */
-            --focus-yellow: #FFD54F; /* 鵝黃色 */
+            --bg-beige: #FDFBF7;
+            --primary-orange: #E65100;
+            --focus-yellow: #FFD54F;
             --text-dark: #333333;
             --border-light: #DDDDDD;
             --overlay-bg: rgba(0, 0, 0, 0.5);
         }
 
-        /* 鎖死 body 與 html，禁止任何捲動 */
         html, body {
             margin: 0;
             padding: 0;
@@ -30,7 +29,6 @@
             align-items: center;
         }
 
-        /* 主容器，加入 transition 以便平滑上移 */
         .container {
             background-color: #FFFFFF;
             padding: 20px;
@@ -39,10 +37,9 @@
             width: 90%;
             max-width: 400px;
             box-sizing: border-box;
-            transition: transform 0.3s ease; /* 鍵盤防擋動畫 */
+            transition: transform 0.3s ease;
         }
 
-        /* 頂部標題區與公式按鈕 */
         .header {
             display: flex;
             justify-content: space-between;
@@ -66,10 +63,10 @@
             cursor: pointer;
         }
 
-        /* 雙欄緊湊佈局 */
+        /* 網格佈局：改為三欄等寬，讓三個部位在同一行 */
         .input-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
         }
 
@@ -78,7 +75,7 @@
             flex-direction: column;
         }
 
-        /* 年齡框佔滿整排 */
+        /* 年齡框佔滿整排 (跨越三個網格) */
         .full-width {
             grid-column: 1 / -1; 
         }
@@ -88,6 +85,7 @@
             font-weight: bold;
             font-size: 12px;
             white-space: nowrap;
+            text-align: center;
         }
 
         input[type=number]::-webkit-inner-spin-button, 
@@ -148,19 +146,21 @@
             margin-top: 15px;
         }
 
+        /* 結果區塊改為常駐顯示 */
         .result-box {
             margin-top: 15px;
             padding: 15px;
             background-color: var(--focus-yellow);
             border-radius: 8px;
             text-align: center;
-            display: none;
+            display: block; 
         }
 
+        /* 加大結果數字的字體 */
         .result-box h2 {
             margin: 0 0 5px 0;
             color: var(--primary-orange);
-            font-size: 28px;
+            font-size: 48px; 
         }
 
         .result-box p {
@@ -169,7 +169,6 @@
             color: var(--text-dark);
         }
 
-        /* --- 公式彈出視窗 (Modal) --- */
         .modal {
             display: none; 
             position: fixed;
@@ -243,18 +242,18 @@
         </div>
 
         <div class="form-group">
-            <label id="label-site1" for="site1">胸部 (mm)</label>
-            <input type="number" id="site1" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+            <label id="label-site1" for="site1">胸部</label>
+            <input type="number" id="site1" inputmode="decimal" min="0" step="0.1" placeholder="mm">
         </div>
 
         <div class="form-group">
-            <label id="label-site2" for="site2">腹部 (mm)</label>
-            <input type="number" id="site2" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+            <label id="label-site2" for="site2">腹部</label>
+            <input type="number" id="site2" inputmode="decimal" min="0" step="0.1" placeholder="mm">
         </div>
 
-        <div class="form-group full-width">
-            <label id="label-site3" for="site3">大腿 (mm)</label>
-            <input type="number" id="site3" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+        <div class="form-group">
+            <label id="label-site3" for="site3">大腿</label>
+            <input type="number" id="site3" inputmode="decimal" min="0" step="0.1" placeholder="mm">
         </div>
     </div>
 
@@ -293,23 +292,18 @@
     let currentGender = 'male';
     const container = document.getElementById('app-container');
 
-    // 鍵盤防擋與自動全選機制
     document.querySelectorAll('input[type="number"]').forEach(input => {
-        // 點擊自動全選
         input.addEventListener('focus', function() {
             this.select();
-            // 在手機螢幕上，點擊輸入框時將整個容器往上移，避免被虛擬鍵盤擋住
             if (window.innerHeight < 700) {
                 container.style.transform = 'translateY(-15vh)';
             }
         });
         
-        // 離開輸入框時，容器歸位
         input.addEventListener('blur', function() {
             container.style.transform = 'translateY(0)';
         });
 
-        // 強制阻擋負數輸入
         input.addEventListener('input', function() {
             if (this.value < 0) this.value = 0;
         });
@@ -322,13 +316,16 @@
         document.getElementById('btn-' + gender).classList.add('active');
 
         if (gender === 'male') {
-            document.getElementById('label-site1').innerText = '胸部 (mm)';
-            document.getElementById('label-site2').innerText = '腹部 (mm)';
+            document.getElementById('label-site1').innerText = '胸部';
+            document.getElementById('label-site2').innerText = '腹部';
         } else {
-            document.getElementById('label-site1').innerText = '三頭肌 (mm)';
-            document.getElementById('label-site2').innerText = '髂骨上 (mm)';
+            document.getElementById('label-site1').innerText = '三頭肌';
+            document.getElementById('label-site2').innerText = '髂骨上';
         }
-        document.getElementById('result-box').style.display = 'none';
+        
+        // 切換性別時，重置數字顯示，但不隱藏框格
+        document.getElementById('result-value').innerText = '-- %';
+        document.getElementById('bd-value').innerText = '--';
     }
 
     function calculateBodyFat() {
@@ -358,13 +355,10 @@
 
         document.getElementById('result-value').innerText = bodyFat.toFixed(1) + ' %';
         document.getElementById('bd-value').innerText = bodyDensity.toFixed(4);
-        document.getElementById('result-box').style.display = 'block';
 
-        // 計算後主動移除焦點，收起手機鍵盤
         document.activeElement.blur();
     }
 
-    // Modal 控制
     const modal = document.getElementById("formulaModal");
     function openModal() {
         modal.style.display = "flex";
@@ -372,7 +366,6 @@
     function closeModal() {
         modal.style.display = "none";
     }
-    // 點擊視窗外圍也能關閉
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
