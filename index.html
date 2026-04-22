@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>專業體脂肪計算機 (Jackson-Pollock 3點法)</title>
+    <style>
+        :root {
+            --bg-beige: #FDFBF7; /* 米色 */
+            --primary-orange: #E65100; /* 夕陽橘紅色 */
+            --focus-yellow: #FFD54F; /* 鵝黃色 */
+            --text-dark: #333333;
+            --border-light: #DDDDDD;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-beige);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #FFFFFF;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-orange);
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* 隱藏原生數字鍵盤的上下箭頭 */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--focus-yellow);
+            background-color: #FFFDE7;
+        }
+
+        .gender-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .gender-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .gender-btn.active {
+            background-color: var(--focus-yellow);
+            border-color: var(--focus-yellow);
+            color: var(--text-dark);
+        }
+
+        button.calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-orange);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button.calculate-btn:hover {
+            background-color: #BF360C;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--focus-yellow);
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-box h2 {
+            margin: 0 0 10px 0;
+            color: var(--primary-orange);
+            font-size: 36px;
+        }
+
+        .result-box p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+        
+        .error-msg {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>體脂夾計算機</h1>
+
+    <div class="gender-selector">
+        <div class="gender-btn active" onclick="setGender('male')" id="btn-male">男性</div>
+        <div class="gender-btn" onclick="setGender('female')" id="btn-female">女性</div>
+    </div>
+
+    <div class="form-group">
+        <label for="age">年齡 (歲)</label>
+        <input type="number" id="age" inputmode="decimal" min="0" step="1" placeholder="請輸入年齡">
+    </div>
+
+    <div class="form-group">
+        <label id="label-site1" for="site1">胸部皮褶 (mm)</label>
+        <input type="number" id="site1" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+    </div>
+
+    <div class="form-group">
+        <label id="label-site2" for="site2">腹部皮褶 (mm)</label>
+        <input type="number" id="site2" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+    </div>
+
+    <div class="form-group">
+        <label id="label-site3" for="site3">大腿皮褶 (mm)</label>
+        <input type="number" id="site3" inputmode="decimal" min="0" step="0.1" placeholder="輸入數值">
+    </div>
+
+    <p class="error-msg" id="error-msg">請填寫所有欄位，且數值不可為負。</p>
+
+    <button class="calculate-btn" onclick="calculateBodyFat()">計算體脂率</button>
+
+    <div class="result-box" id="result-box">
+        <p>你的體脂肪率約為：</p>
+        <h2 id="result-value">-- %</h2>
+    </div>
+</div>
+
+<script>
+    let currentGender = 'male';
+
+    // 自動全選與防呆機制
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        // 點擊自動全選
+        input.addEventListener('focus', function() {
+            this.select();
+        });
+        
+        // 強制阻擋負數輸入
+        input.addEventListener('input', function() {
+            if (this.value < 0) {
+                this.value = 0;
+            }
+        });
+    });
+
+    // 切換性別與測量部位
+    function setGender(gender) {
+        currentGender = gender;
+        
+        // 更新按鈕樣式
+        document.getElementById('btn-male').classList.remove('active');
+        document.getElementById('btn-female').classList.remove('active');
+        document.getElementById('btn-' + gender).classList.add('active');
+
+        // 更新標籤文字
+        if (gender === 'male') {
+            document.getElementById('label-site1').innerText = '胸部皮褶 (mm)';
+            document.getElementById('label-site2').innerText = '腹部皮褶 (mm)';
+        } else {
+            document.getElementById('label-site1').innerText = '三頭肌皮褶 (mm)';
+            document.getElementById('label-site2').innerText = '髂骨上皮褶 (mm)';
+        }
+        
+        // 隱藏結果與錯誤訊息
+        document.getElementById('result-box').style.display = 'none';
+        document.getElementById('error-msg').style.display = 'none';
+    }
+
+    // 計算邏輯
+    function calculateBodyFat() {
+        const age = parseFloat(document.getElementById('age').value);
+        const site1 = parseFloat(document.getElementById('site1').value);
+        const site2 = parseFloat(document.getElementById('site2').value);
+        const site3 = parseFloat(document.getElementById('site3').value);
+        const errorMsg = document.getElementById('error-msg');
+
+        // 檢查是否有漏填或負數
+        if (isNaN(age) || isNaN(site1) || isNaN(site2) || isNaN(site3) || 
+            age < 0 || site1 < 0 || site2 < 0 || site3 < 0) {
+            errorMsg.style.display = 'block';
+            document.getElementById('result-box').style.display = 'none';
+            return;
+        }
+
+        errorMsg.style.display = 'none';
+        
+        const sum = site1 + site2 + site3;
+        let bodyDensity = 0;
+
+        // Jackson-Pollock 3-site 公式
+        if (currentGender === 'male') {
+            bodyDensity = 1.10938 - (0.0008267 * sum) + (0.0000016 * Math.pow(sum, 2)) - (0.0002574 * age);
+        } else {
+            bodyDensity = 1.0994921 - (0.0009929 * sum) + (0.0000023 * Math.pow(sum, 2)) - (0.0001392 * age);
+        }
+
+        // Siri 公式轉換體脂率
+        let bodyFat = ((4.95 / bodyDensity) - 4.50) * 100;
+        
+        // 異常值處理 (避免輸入錯誤導致計算出負數或超過100%)
+        if (bodyFat < 2) bodyFat = 2.0; 
+        if (bodyFat > 60) bodyFat = 60.0;
+
+        // 顯示結果
+        const resultBox = document.getElementById('result-box');
+        const resultValue = document.getElementById('result-value');
+        
+        resultValue.innerText = bodyFat.toFixed(1) + ' %';
+        resultBox.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
