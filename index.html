@@ -6,12 +6,13 @@
     <title>專業體脂肪計算機 (Jackson-Pollock 3點法)</title>
     <style>
         :root {
-            --bg-beige: #FDFBF7;
-            --primary-orange: #E65100;
-            --focus-yellow: #FFD54F;
-            --text-dark: #333333;
-            --border-light: #DDDDDD;
-            --overlay-bg: rgba(0, 0, 0, 0.5);
+            /* 調整為低飽和度的柔和色系 */
+            --bg-beige: #FAF6F0;       /* 燕麥米色 */
+            --primary-orange: #E07A5F; /* 柔和磚橘色 */
+            --focus-yellow: #FDEBB3;   /* 奶油粉黃色 */
+            --text-dark: #4A4036;      /* 深褐灰色 (取代純黑) */
+            --border-light: #E8E0D5;   /* 柔和邊框色 */
+            --overlay-bg: rgba(74, 64, 54, 0.4); /* 柔和的遮罩層 */
         }
 
         html, body {
@@ -32,8 +33,8 @@
         .container {
             background-color: #FFFFFF;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 16px; /* 稍微增加圓角讓視覺更柔和 */
+            box-shadow: 0 8px 20px rgba(224, 122, 95, 0.08); /* 陰影加上一點暖色調 */
             width: 90%;
             max-width: 400px;
             box-sizing: border-box;
@@ -51,19 +52,25 @@
             color: var(--primary-orange);
             font-size: 20px;
             margin: 0;
+            font-weight: 600;
         }
 
         .formula-btn {
             background: none;
             border: 1px solid var(--primary-orange);
             color: var(--primary-orange);
-            padding: 5px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        /* 網格佈局：改為三欄等寬，讓三個部位在同一行 */
+        .formula-btn:active {
+            background-color: var(--primary-orange);
+            color: #fff;
+        }
+
         .input-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -75,17 +82,17 @@
             flex-direction: column;
         }
 
-        /* 年齡框佔滿整排 (跨越三個網格) */
         .full-width {
             grid-column: 1 / -1; 
         }
 
         label {
-            margin-bottom: 4px;
-            font-weight: bold;
-            font-size: 12px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13px;
             white-space: nowrap;
             text-align: center;
+            color: var(--text-dark);
         }
 
         input[type=number]::-webkit-inner-spin-button, 
@@ -98,16 +105,22 @@
             width: 100%;
             padding: 10px;
             border: 2px solid var(--border-light);
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             box-sizing: border-box;
             outline: none;
             text-align: center;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]::placeholder {
+            color: #C2BAB2;
         }
 
         input[type="number"]:focus {
-            border-color: var(--focus-yellow);
-            background-color: #FFFDE7;
+            border-color: var(--primary-orange);
+            background-color: var(--focus-yellow);
         }
 
         .gender-selector {
@@ -121,46 +134,53 @@
             padding: 10px;
             text-align: center;
             border: 2px solid var(--border-light);
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 14px;
+            color: #9A8F85;
+            transition: all 0.2s ease;
         }
 
         .gender-btn.active {
             background-color: var(--focus-yellow);
             border-color: var(--focus-yellow);
-            color: var(--text-dark);
+            color: var(--primary-orange);
         }
 
         button.calculate-btn {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background-color: var(--primary-orange);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             margin-top: 15px;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 4px 10px rgba(224, 122, 95, 0.2);
         }
 
-        /* 結果區塊改為常駐顯示 */
+        button.calculate-btn:active {
+            background-color: #D06B50;
+        }
+
         .result-box {
             margin-top: 15px;
             padding: 15px;
             background-color: var(--focus-yellow);
-            border-radius: 8px;
+            border-radius: 12px;
             text-align: center;
             display: block; 
         }
 
-        /* 加大結果數字的字體 */
         .result-box h2 {
             margin: 0 0 5px 0;
             color: var(--primary-orange);
             font-size: 48px; 
+            font-weight: bold;
         }
 
         .result-box p {
@@ -180,12 +200,13 @@
             background-color: var(--overlay-bg);
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(2px); /* 讓背景稍微模糊，質感更好 */
         }
 
         .modal-content {
             background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
+            padding: 24px;
+            border-radius: 16px;
             width: 85%;
             max-width: 350px;
             position: relative;
@@ -193,10 +214,10 @@
 
         .close-modal {
             position: absolute;
-            top: 10px;
-            right: 15px;
-            color: #aaa;
-            font-size: 24px;
+            top: 12px;
+            right: 18px;
+            color: #C2BAB2;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -209,15 +230,16 @@
 
         .formula-text {
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.6;
             background-color: var(--bg-beige);
-            padding: 10px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             margin-bottom: 10px;
+            color: var(--text-dark);
         }
         
         .formula-text span {
-            font-weight: bold;
+            font-weight: 600;
             color: var(--primary-orange);
         }
     </style>
@@ -284,7 +306,7 @@
             <span>Siri 體脂率轉換公式：</span><br>
             BF% = (4.95 / BD - 4.50) &times; 100
         </div>
-        <p style="font-size: 11px; color: #666;">*S = 三個部位皮褶厚度總和(mm)，Age = 年齡(歲)</p>
+        <p style="font-size: 11px; color: #9A8F85; margin-top: 8px;">*S = 三個部位皮褶厚度總和(mm)<br>*Age = 年齡(歲)</p>
     </div>
 </div>
 
@@ -323,7 +345,6 @@
             document.getElementById('label-site2').innerText = '髂骨上';
         }
         
-        // 切換性別時，重置數字顯示，但不隱藏框格
         document.getElementById('result-value').innerText = '-- %';
         document.getElementById('bd-value').innerText = '--';
     }
