@@ -4,27 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>專業體脂肪計算機 (Jackson-Pollock 3點法)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
-            /* 共通基礎色 */
             --bg-main: #F4F5F7;        
             --text-dark: #2C2C2E;      
             --text-gray: #8E8E93;      
             --border-light: #E5E5EA;   
             --input-bg: #FFFFFF;
-            --overlay-bg: rgba(0, 0, 0, 0.3); 
+            --overlay-bg: rgba(0, 0, 0, 0.4); 
 
-            /* 預設主題：男性 (清新薄荷綠) */
-            --primary-color: #5ED18D;   
-            --primary-color-active: #4CB878; 
-            --focus-bg: #F0FBF4;       
-        }
-
-        /* 女性主題：切換為晴空藍 */
-        body.theme-female {
+            /* 預設主題：男性 (改為晴空藍) */
             --primary-color: #5BAFE2;   
             --primary-color-active: #4A9BD0; 
             --focus-bg: #F2F9FD;       
+        }
+
+        /* 女性主題：切換為薄荷綠 */
+        body.theme-female {
+            --primary-color: #5ED18D;   
+            --primary-color-active: #4CB878; 
+            --focus-bg: #F0FBF4;       
         }
 
         html, body {
@@ -40,7 +40,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background-color 0.4s ease; /* 讓整體顏色切換更平滑 */
+            transition: background-color 0.4s ease; 
         }
 
         .container {
@@ -52,6 +52,7 @@
             max-width: 400px;
             box-sizing: border-box;
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; /* 為了截圖範圍定位 */
         }
 
         .header {
@@ -63,24 +64,29 @@
 
         h1 {
             color: var(--text-dark);
-            font-size: 22px;
+            font-size: 20px;
             margin: 0;
             font-weight: 800;
         }
 
-        .formula-btn {
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
             background: none;
             border: 1px dashed var(--primary-color);
             color: var(--primary-color);
-            padding: 6px 14px;
+            padding: 4px 10px;
             border-radius: 12px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .formula-btn:active {
+        .icon-btn:active {
             background-color: var(--focus-bg);
         }
 
@@ -187,12 +193,21 @@
 
         .result-box {
             margin-top: 20px;
-            padding: 20px;
+            padding: 15px 20px;
             background-color: var(--focus-bg);
             border-radius: 14px;
             text-align: center;
             display: block; 
             transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .date-badge {
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .result-box h2 {
@@ -210,10 +225,30 @@
             color: var(--text-gray);
         }
 
+        /* 截圖分享按鈕 */
+        button.share-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 14px; 
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            display: none; /* 預設隱藏，計算後才出現 */
+        }
+        
+        button.share-btn:active {
+            background-color: var(--focus-bg);
+        }
+
         .modal {
             display: none; 
             position: fixed;
-            z-index: 10;
+            z-index: 100;
             left: 0;
             top: 0;
             width: 100%;
@@ -230,6 +265,8 @@
             border-radius: 20px;
             width: 85%;
             max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
             position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
@@ -251,7 +288,7 @@
             font-weight: 800;
         }
 
-        .formula-text {
+        .modal-text-block {
             font-size: 13px;
             line-height: 1.6;
             background-color: var(--bg-main);
@@ -261,19 +298,41 @@
             color: var(--text-dark);
         }
         
-        .formula-text span {
+        .modal-text-block span {
             font-weight: bold;
             color: var(--primary-color);
             transition: color 0.3s ease;
         }
+
+        /* 截圖專用 Modal 樣式 */
+        #screenshot-result {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .screenshot-hint {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* 隱藏滾動條 */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body>
 
 <div class="container" id="app-container">
-    <div class="header">
+    <div class="header" id="app-header">
         <h1>體脂夾計算機</h1>
-        <button class="formula-btn" onclick="openModal()">★ 查看公式</button>
+        <div class="header-actions" id="action-buttons">
+            <button class="icon-btn" onclick="openModal('tutorialModal')">教學</button>
+            <button class="icon-btn" onclick="openModal('formulaModal')">公式</button>
+        </div>
     </div>
 
     <div class="gender-selector">
@@ -303,40 +362,87 @@
         </div>
     </div>
 
-    <button class="calculate-btn" onclick="calculateBodyFat()">開始計算</button>
+    <button class="calculate-btn" id="calc-btn" onclick="calculateBodyFat()">開始計算</button>
 
     <div class="result-box" id="result-box">
+        <div class="date-badge" id="date-display">YYYY/MM/DD</div>
         <h2 id="result-value">-- %</h2>
         <p>身體密度 (BD): <span id="bd-value">--</span></p>
     </div>
+    
+    <button class="share-btn" id="share-btn" onclick="generateScreenshot()">生成紀錄圖片</button>
 </div>
 
 <div id="formulaModal" class="modal">
     <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <span class="close-modal" onclick="closeModal('formulaModal')">&times;</span>
         <h3>Jackson-Pollock 3點法</h3>
         
-        <div class="formula-text">
+        <div class="modal-text-block">
             <span>身體密度 (BD) - 男性：</span><br>
             1.10938 - (0.0008267 &times; S) + (0.0000016 &times; S<sup>2</sup>) - (0.0002574 &times; Age)
         </div>
         
-        <div class="formula-text">
+        <div class="modal-text-block">
             <span>身體密度 (BD) - 女性：</span><br>
             1.0994921 - (0.0009929 &times; S) + (0.0000023 &times; S<sup>2</sup>) - (0.0001392 &times; Age)
         </div>
 
-        <div class="formula-text">
+        <div class="modal-text-block">
             <span>Siri 體脂率轉換公式：</span><br>
             BF% = (4.95 / BD - 4.50) &times; 100
         </div>
-        <p style="font-size: 12px; color: var(--text-gray); margin-top: 8px; font-weight: bold;">*S = 三個部位皮褶厚度總和(mm)<br>*Age = 年齡(歲)</p>
+        <p style="font-size: 11px; color: var(--text-gray); margin-top: 8px; font-weight: bold;">*S = 三個部位皮褶厚度總和(mm)<br>*Age = 年紀(歲)</p>
+    </div>
+</div>
+
+<div id="tutorialModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('tutorialModal')">&times;</span>
+        <h3>體脂夾測量教學</h3>
+        
+        <div class="modal-text-block">
+            <span>★ 基本技巧</span><br>
+            用拇指與食指捏起皮膚與皮下脂肪（不要捏到肌肉），在捏起處下方約 1 公分處夾上體脂夾。等待 1-2 秒讀取數值。每個部位建議測量 3 次取平均。
+        </div>
+        
+        <div class="modal-text-block" id="tutorial-male">
+            <span>測量部位 (男性)：</span><br>
+            • <b>胸部：</b> 乳頭與腋下連線的 1/2 處，斜向捏起。<br>
+            • <b>腹部：</b> 肚臍旁邊約 2 公分處，垂直捏起。<br>
+            • <b>大腿：</b> 鼠蹊部與膝蓋上緣的中點，垂直捏起。
+        </div>
+        
+        <div class="modal-text-block" id="tutorial-female" style="display: none;">
+            <span>測量部位 (女性)：</span><br>
+            • <b>三頭肌：</b> 手臂後側，肩膀與手肘的中點，垂直捏起。<br>
+            • <b>髂骨上：</b> 側腹部骨盆上緣（腰部最細處向下），斜向捏起。<br>
+            • <b>大腿：</b> 鼠蹊部與膝蓋上緣的中點，垂直捏起。
+        </div>
+    </div>
+</div>
+
+<div id="screenshotModal" class="modal">
+    <div class="modal-content" style="background-color: transparent; box-shadow: none; padding: 10px;">
+        <span class="close-modal" style="color: #fff; top: -30px; right: 10px;" onclick="closeModal('screenshotModal')">&times;</span>
+        <img id="screenshot-result" src="" alt="體脂紀錄">
+        <p class="screenshot-hint" style="color: #fff;">⬆️ 請長按上方圖片進行儲存或分享 ⬆️</p>
     </div>
 </div>
 
 <script>
     let currentGender = 'male';
     const container = document.getElementById('app-container');
+
+    // 設定今天的日期
+    function setTodayDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('date-display').innerText = `${yyyy}/${mm}/${dd}`;
+    }
+    setTodayDate();
 
     document.querySelectorAll('input[type="number"]').forEach(input => {
         input.addEventListener('focus', function() {
@@ -358,19 +464,20 @@
     function setGender(gender) {
         currentGender = gender;
         
-        // 切換整體色彩主題 (改變 body 的 class)
         if (gender === 'female') {
             document.body.classList.add('theme-female');
+            document.getElementById('tutorial-male').style.display = 'none';
+            document.getElementById('tutorial-female').style.display = 'block';
         } else {
             document.body.classList.remove('theme-female');
+            document.getElementById('tutorial-male').style.display = 'block';
+            document.getElementById('tutorial-female').style.display = 'none';
         }
 
-        // 更新按鈕狀態
         document.getElementById('btn-male').classList.remove('active');
         document.getElementById('btn-female').classList.remove('active');
         document.getElementById('btn-' + gender).classList.add('active');
 
-        // 更新測量部位文字
         if (gender === 'male') {
             document.getElementById('label-site1').innerText = '胸部';
             document.getElementById('label-site2').innerText = '腹部';
@@ -379,9 +486,9 @@
             document.getElementById('label-site2').innerText = '髂骨上';
         }
         
-        // 重置結果區塊
         document.getElementById('result-value').innerText = '-- %';
         document.getElementById('bd-value').innerText = '--';
+        document.getElementById('share-btn').style.display = 'none'; // 切換性別時隱藏截圖按鈕
     }
 
     function calculateBodyFat() {
@@ -405,27 +512,60 @@
         }
 
         let bodyFat = ((4.95 / bodyDensity) - 4.50) * 100;
-        
         if (bodyFat < 2) bodyFat = 2.0; 
         if (bodyFat > 60) bodyFat = 60.0;
 
+        setTodayDate(); // 確保日期是最新
         document.getElementById('result-value').innerText = bodyFat.toFixed(1) + ' %';
         document.getElementById('bd-value').innerText = bodyDensity.toFixed(4);
+        
+        // 顯示生成圖片按鈕
+        document.getElementById('share-btn').style.display = 'block';
 
         document.activeElement.blur();
     }
 
-    const modal = document.getElementById("formulaModal");
-    function openModal() {
-        modal.style.display = "flex";
+    // Modal 控制函數
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = "flex";
     }
-    function closeModal() {
-        modal.style.display = "none";
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
     }
+
+    // 點擊背景關閉 Modal
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
         }
+    }
+
+    // 生成截圖功能
+    function generateScreenshot() {
+        const shareBtn = document.getElementById('share-btn');
+        const calcBtn = document.getElementById('calc-btn');
+        const actionBtns = document.getElementById('action-buttons');
+        
+        // 截圖前暫時隱藏按鈕，讓圖片更乾淨
+        shareBtn.style.display = 'none';
+        calcBtn.style.display = 'none';
+        actionBtns.style.display = 'none';
+
+        html2canvas(container, {
+            scale: 3, // 提高圖片解析度
+            backgroundColor: '#FFFFFF',
+            borderRadius: 20
+        }).then(canvas => {
+            // 截圖完成後恢復按鈕顯示
+            shareBtn.style.display = 'block';
+            calcBtn.style.display = 'block';
+            actionBtns.style.display = 'flex';
+
+            // 將 canvas 轉為圖片網址，並顯示在 Modal 內供使用者長按儲存
+            const imgUrl = canvas.toDataURL("image/png");
+            document.getElementById('screenshot-result').src = imgUrl;
+            openModal('screenshotModal');
+        });
     }
 </script>
 
