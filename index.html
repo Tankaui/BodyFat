@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>專業體脂肪計算機 (Jackson-Pollock 3點法)</title>
+    <title>體脂肪計算機</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -12,7 +12,7 @@
             --text-gray: #8E8E93;      
             --border-light: #E5E5EA;   
             --input-bg: #FFFFFF;
-            --overlay-bg: rgba(0, 0, 0, 0.6); /* 加深一點背景遮罩，讓圖片更清楚 */
+            --overlay-bg: rgba(0, 0, 0, 0.6); 
 
             /* 預設主題：男性 (晴空藍) */
             --primary-color: #5BAFE2;   
@@ -245,6 +245,15 @@
             background-color: var(--focus-bg);
         }
 
+        .app-version {
+            font-size: 10px;
+            color: #D1D1D6;
+            text-align: center;
+            margin-top: 12px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
         .modal {
             display: none; 
             position: fixed;
@@ -304,11 +313,10 @@
             transition: color 0.3s ease;
         }
 
-        /* 優化截圖專用 Modal 樣式，避免畫面卡死 */
         #screenshot-result {
             width: 100%;
-            max-height: 60vh; /* 限制最高高度，避免圖片把按鈕擠出畫面外 */
-            object-fit: contain; /* 確保圖片不變形縮放 */
+            max-height: 60vh;
+            object-fit: contain; 
             border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
             margin-bottom: 15px;
@@ -320,7 +328,7 @@
             font-weight: bold;
             color: #ffffff;
             margin: 0 0 15px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* 加上陰影讓字更清楚 */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         ::-webkit-scrollbar { width: 0px; background: transparent; }
@@ -373,12 +381,14 @@
     </div>
     
     <button class="share-btn" id="share-btn" onclick="generateScreenshot()">生成紀錄圖片</button>
+
+    <div class="app-version" id="app-version">Jackson-Pollock 3點法 · v1.0.0</div>
 </div>
 
 <div id="formulaModal" class="modal" onclick="closeModal('formulaModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeModal('formulaModal')">&times;</span>
-        <h3>Jackson-Pollock 3點法</h3>
+        <h3>計算公式</h3>
         
         <div class="modal-text-block">
             <span>身體密度 (BD) - 男性：</span><br>
@@ -391,7 +401,7 @@
         </div>
 
         <div class="modal-text-block">
-            <span>Siri 體脂率轉換公式：</span><br>
+            <span>Siri 轉換公式：</span><br>
             BF% = (4.95 / BD - 4.50) &times; 100
         </div>
         <p style="font-size: 11px; color: var(--text-gray); margin-top: 8px; font-weight: bold;">*S = 三個部位皮褶厚度總和(mm)<br>*Age = 年紀(歲)</p>
@@ -401,7 +411,7 @@
 <div id="tutorialModal" class="modal" onclick="closeModal('tutorialModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeModal('tutorialModal')">&times;</span>
-        <h3>體脂夾測量教學</h3>
+        <h3>測量教學</h3>
         
         <div class="modal-text-block">
             <span>★ 基本技巧</span><br>
