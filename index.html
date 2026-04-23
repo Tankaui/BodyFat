@@ -225,7 +225,7 @@
             color: var(--text-gray);
         }
 
-        /* 截圖分享按鈕 */
+        /* 截圖分享按鈕 - 常駐顯示 */
         button.share-btn {
             width: 100%;
             padding: 12px;
@@ -238,10 +238,17 @@
             cursor: pointer;
             margin-top: 10px;
             transition: all 0.3s ease;
-            display: none; 
+        }
+
+        /* 剛載入或切換性別時的不可點擊淡灰色狀態 */
+        button.share-btn:disabled {
+            color: var(--text-gray);
+            border-color: var(--border-light);
+            cursor: not-allowed;
+            opacity: 0.5;
         }
         
-        button.share-btn:active {
+        button.share-btn:not(:disabled):active {
             background-color: var(--focus-bg);
         }
 
@@ -338,7 +345,7 @@
 
 <div class="container" id="app-container">
     <div class="header" id="app-header">
-        <h1>體脂夾計算機</h1>
+        <h1>體脂肪計算機</h1>
         <div class="header-actions" id="action-buttons">
             <button class="icon-btn" onclick="openModal('tutorialModal')">教學</button>
             <button class="icon-btn" onclick="openModal('formulaModal')">公式</button>
@@ -380,7 +387,7 @@
         <p>身體密度 (BD): <span id="bd-value">--</span></p>
     </div>
     
-    <button class="share-btn" id="share-btn" onclick="generateScreenshot()">生成紀錄圖片</button>
+    <button class="share-btn" id="share-btn" onclick="generateScreenshot()" disabled>生成紀錄圖片</button>
 
     <div class="app-version" id="app-version">Jackson-Pollock 3點法 · v1.0.0</div>
 </div>
@@ -502,7 +509,9 @@
         
         document.getElementById('result-value').innerText = '-- %';
         document.getElementById('bd-value').innerText = '--';
-        document.getElementById('share-btn').style.display = 'none'; 
+        
+        // 切換性別時，重置截圖按鈕為不可點擊的灰色狀態
+        document.getElementById('share-btn').disabled = true;
     }
 
     function calculateBodyFat() {
@@ -533,7 +542,9 @@
         document.getElementById('result-value').innerText = bodyFat.toFixed(1) + ' %';
         document.getElementById('bd-value').innerText = bodyDensity.toFixed(4);
         
-        document.getElementById('share-btn').style.display = 'block';
+        // 成功計算出結果後，解除截圖按鈕的禁用狀態
+        document.getElementById('share-btn').disabled = false;
+        
         document.activeElement.blur();
     }
 
@@ -550,18 +561,20 @@
         const calcBtn = document.getElementById('calc-btn');
         const actionBtns = document.getElementById('action-buttons');
         
-        shareBtn.style.display = 'none';
-        calcBtn.style.display = 'none';
-        actionBtns.style.display = 'none';
+        // 改用 visibility 隱藏，保留空間，防止畫面跳動
+        shareBtn.style.visibility = 'hidden';
+        calcBtn.style.visibility = 'hidden';
+        actionBtns.style.visibility = 'hidden';
 
         html2canvas(container, {
             scale: 3, 
             backgroundColor: '#FFFFFF',
             borderRadius: 20
         }).then(canvas => {
-            shareBtn.style.display = 'block';
-            calcBtn.style.display = 'block';
-            actionBtns.style.display = 'flex';
+            // 截圖完成，恢復顯示
+            shareBtn.style.visibility = 'visible';
+            calcBtn.style.visibility = 'visible';
+            actionBtns.style.visibility = 'visible';
 
             const imgUrl = canvas.toDataURL("image/png");
             document.getElementById('screenshot-result').src = imgUrl;
