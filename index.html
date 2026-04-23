@@ -172,9 +172,34 @@
             color: #FFFFFF;
         }
 
+        /* 將清空與計算按鈕並排的容器 */
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button.clear-btn {
+            flex: 1;
+            padding: 16px 0;
+            background-color: var(--bg-main);
+            color: var(--text-gray);
+            border: 1px solid var(--border-light);
+            border-radius: 14px; 
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button.clear-btn:active {
+            background-color: var(--border-light);
+            transform: scale(0.98);
+        }
+
         button.calculate-btn {
-            width: 100%;
-            padding: 16px;
+            flex: 2;
+            padding: 16px 0;
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -182,7 +207,6 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 20px;
             transition: all 0.3s ease;
         }
 
@@ -225,7 +249,6 @@
             color: var(--text-gray);
         }
 
-        /* 截圖分享按鈕 - 常駐顯示 */
         button.share-btn {
             width: 100%;
             padding: 12px;
@@ -240,7 +263,6 @@
             transition: all 0.3s ease;
         }
 
-        /* 剛載入或切換性別時的不可點擊淡灰色狀態 */
         button.share-btn:disabled {
             color: var(--text-gray);
             border-color: var(--border-light);
@@ -379,7 +401,10 @@
         </div>
     </div>
 
-    <button class="calculate-btn" id="calc-btn" onclick="calculateBodyFat()">開始計算</button>
+    <div class="action-row" id="main-action-row">
+        <button class="clear-btn" onclick="clearInputs()">清空</button>
+        <button class="calculate-btn" onclick="calculateBodyFat()">開始計算</button>
+    </div>
 
     <div class="result-box" id="result-box">
         <div class="date-badge" id="date-display">YYYY/MM/DD</div>
@@ -507,10 +532,21 @@
             document.getElementById('label-site2').innerText = '髂骨上';
         }
         
+        // 切換性別時不主動清空數字，但會重置計算結果與截圖按鈕
         document.getElementById('result-value').innerText = '-- %';
         document.getElementById('bd-value').innerText = '--';
+        document.getElementById('share-btn').disabled = true;
+    }
+
+    // 清空按鈕功能
+    function clearInputs() {
+        document.getElementById('age').value = '';
+        document.getElementById('site1').value = '';
+        document.getElementById('site2').value = '';
+        document.getElementById('site3').value = '';
         
-        // 切換性別時，重置截圖按鈕為不可點擊的灰色狀態
+        document.getElementById('result-value').innerText = '-- %';
+        document.getElementById('bd-value').innerText = '--';
         document.getElementById('share-btn').disabled = true;
     }
 
@@ -542,7 +578,6 @@
         document.getElementById('result-value').innerText = bodyFat.toFixed(1) + ' %';
         document.getElementById('bd-value').innerText = bodyDensity.toFixed(4);
         
-        // 成功計算出結果後，解除截圖按鈕的禁用狀態
         document.getElementById('share-btn').disabled = false;
         
         document.activeElement.blur();
@@ -558,12 +593,12 @@
 
     function generateScreenshot() {
         const shareBtn = document.getElementById('share-btn');
-        const calcBtn = document.getElementById('calc-btn');
+        const mainActionRow = document.getElementById('main-action-row');
         const actionBtns = document.getElementById('action-buttons');
         
-        // 改用 visibility 隱藏，保留空間，防止畫面跳動
+        // 隱藏時改用 visibility，保留實體空間防止畫面跳動
         shareBtn.style.visibility = 'hidden';
-        calcBtn.style.visibility = 'hidden';
+        mainActionRow.style.visibility = 'hidden';
         actionBtns.style.visibility = 'hidden';
 
         html2canvas(container, {
@@ -573,7 +608,7 @@
         }).then(canvas => {
             // 截圖完成，恢復顯示
             shareBtn.style.visibility = 'visible';
-            calcBtn.style.visibility = 'visible';
+            mainActionRow.style.visibility = 'visible';
             actionBtns.style.visibility = 'visible';
 
             const imgUrl = canvas.toDataURL("image/png");
