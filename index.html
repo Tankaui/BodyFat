@@ -6,16 +6,25 @@
     <title>專業體脂肪計算機 (Jackson-Pollock 3點法)</title>
     <style>
         :root {
-            /* 從參考圖片提取的清新款色調 */
-            --bg-main: #F4F5F7;        /* 極淺灰底色 */
-            --primary-blue: #5BAFE2;   /* 晴空藍 (開始訓練按鈕色) */
-            --primary-blue-active: #4A9BD0; 
-            --text-dark: #2C2C2E;      /* 主要深色文字 */
-            --text-gray: #8E8E93;      /* 次要標籤灰色 */
-            --border-light: #E5E5EA;   /* 柔和的邊框線條 */
+            /* 共通基礎色 */
+            --bg-main: #F4F5F7;        
+            --text-dark: #2C2C2E;      
+            --text-gray: #8E8E93;      
+            --border-light: #E5E5EA;   
             --input-bg: #FFFFFF;
-            --focus-bg: #F2F9FD;       /* 聚焦時的極淺藍底色 */
             --overlay-bg: rgba(0, 0, 0, 0.3); 
+
+            /* 預設主題：男性 (清新薄荷綠) */
+            --primary-color: #5ED18D;   
+            --primary-color-active: #4CB878; 
+            --focus-bg: #F0FBF4;       
+        }
+
+        /* 女性主題：切換為晴空藍 */
+        body.theme-female {
+            --primary-color: #5BAFE2;   
+            --primary-color-active: #4A9BD0; 
+            --focus-bg: #F2F9FD;       
         }
 
         html, body {
@@ -31,13 +40,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: background-color 0.4s ease; /* 讓整體顏色切換更平滑 */
         }
 
         .container {
             background-color: #FFFFFF;
             padding: 24px;
-            border-radius: 20px; /* 參考圖片的大圓角 */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); /* 極度柔和的陰影 */
+            border-radius: 20px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); 
             width: 90%;
             max-width: 400px;
             box-sizing: border-box;
@@ -58,17 +68,16 @@
             font-weight: 800;
         }
 
-        /* 參考圖片左下角的引導設定按鈕風格 */
         .formula-btn {
             background: none;
-            border: 1px dashed var(--primary-blue);
-            color: var(--primary-blue);
+            border: 1px dashed var(--primary-color);
+            color: var(--primary-color);
             padding: 6px 14px;
             border-radius: 12px;
             font-size: 13px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .formula-btn:active {
@@ -96,7 +105,7 @@
             font-size: 12px;
             white-space: nowrap;
             text-align: center;
-            color: var(--text-gray); /* 標籤使用淡灰色，凸顯輸入框的數字 */
+            color: var(--text-gray); 
         }
 
         input[type=number]::-webkit-inner-spin-button, 
@@ -109,7 +118,7 @@
             width: 100%;
             padding: 12px 10px;
             background-color: var(--input-bg);
-            border: 1px solid var(--border-light); /* 參考圖片的細邊框 */
+            border: 1px solid var(--border-light); 
             border-radius: 10px;
             font-size: 18px;
             font-weight: bold;
@@ -117,7 +126,7 @@
             outline: none;
             text-align: center;
             color: var(--text-dark);
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         input[type="number"]::placeholder {
@@ -127,7 +136,7 @@
         }
 
         input[type="number"]:focus {
-            border-color: var(--primary-blue);
+            border-color: var(--primary-color);
             background-color: var(--focus-bg);
         }
 
@@ -148,35 +157,34 @@
             font-weight: bold;
             font-size: 16px;
             color: var(--text-gray);
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .gender-btn.active {
-            background-color: var(--primary-blue);
-            border-color: var(--primary-blue);
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
             color: #FFFFFF;
         }
 
         button.calculate-btn {
             width: 100%;
             padding: 16px;
-            background-color: var(--primary-blue);
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 14px; /* 參考開始訓練按鈕的圓角 */
+            border-radius: 14px; 
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 20px;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         button.calculate-btn:active {
-            background-color: var(--primary-blue-active);
+            background-color: var(--primary-color-active);
             transform: scale(0.98);
         }
 
-        /* 結果區塊改為乾淨的淺色卡片 */
         .result-box {
             margin-top: 20px;
             padding: 20px;
@@ -184,13 +192,15 @@
             border-radius: 14px;
             text-align: center;
             display: block; 
+            transition: background-color 0.3s ease;
         }
 
         .result-box h2 {
             margin: 0 0 5px 0;
-            color: var(--primary-blue);
+            color: var(--primary-color);
             font-size: 46px; 
             font-weight: 900;
+            transition: color 0.3s ease;
         }
 
         .result-box p {
@@ -253,7 +263,8 @@
         
         .formula-text span {
             font-weight: bold;
-            color: var(--primary-blue);
+            color: var(--primary-color);
+            transition: color 0.3s ease;
         }
     </style>
 </head>
@@ -272,7 +283,8 @@
 
     <div class="input-grid">
         <div class="form-group full-width">
-            <label for="age">時間 (歲)</label> <input type="number" id="age" inputmode="decimal" min="0" step="1" placeholder="輸入年齡">
+            <label for="age">年紀</label>
+            <input type="number" id="age" inputmode="decimal" min="0" step="1" placeholder="輸入年齡">
         </div>
 
         <div class="form-group">
@@ -345,10 +357,20 @@
 
     function setGender(gender) {
         currentGender = gender;
+        
+        // 切換整體色彩主題 (改變 body 的 class)
+        if (gender === 'female') {
+            document.body.classList.add('theme-female');
+        } else {
+            document.body.classList.remove('theme-female');
+        }
+
+        // 更新按鈕狀態
         document.getElementById('btn-male').classList.remove('active');
         document.getElementById('btn-female').classList.remove('active');
         document.getElementById('btn-' + gender).classList.add('active');
 
+        // 更新測量部位文字
         if (gender === 'male') {
             document.getElementById('label-site1').innerText = '胸部';
             document.getElementById('label-site2').innerText = '腹部';
@@ -357,6 +379,7 @@
             document.getElementById('label-site2').innerText = '髂骨上';
         }
         
+        // 重置結果區塊
         document.getElementById('result-value').innerText = '-- %';
         document.getElementById('bd-value').innerText = '--';
     }
