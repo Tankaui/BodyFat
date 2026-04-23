@@ -12,9 +12,9 @@
             --text-gray: #8E8E93;      
             --border-light: #E5E5EA;   
             --input-bg: #FFFFFF;
-            --overlay-bg: rgba(0, 0, 0, 0.4); 
+            --overlay-bg: rgba(0, 0, 0, 0.6); /* 加深一點背景遮罩，讓圖片更清楚 */
 
-            /* 預設主題：男性 (改為晴空藍) */
+            /* 預設主題：男性 (晴空藍) */
             --primary-color: #5BAFE2;   
             --primary-color-active: #4A9BD0; 
             --focus-bg: #F2F9FD;       
@@ -52,7 +52,7 @@
             max-width: 400px;
             box-sizing: border-box;
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative; /* 為了截圖範圍定位 */
+            position: relative; 
         }
 
         .header {
@@ -238,7 +238,7 @@
             cursor: pointer;
             margin-top: 10px;
             transition: all 0.3s ease;
-            display: none; /* 預設隱藏，計算後才出現 */
+            display: none; 
         }
         
         button.share-btn:active {
@@ -304,23 +304,25 @@
             transition: color 0.3s ease;
         }
 
-        /* 截圖專用 Modal 樣式 */
+        /* 優化截圖專用 Modal 樣式，避免畫面卡死 */
         #screenshot-result {
             width: 100%;
+            max-height: 60vh; /* 限制最高高度，避免圖片把按鈕擠出畫面外 */
+            object-fit: contain; /* 確保圖片不變形縮放 */
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
             margin-bottom: 15px;
         }
         
         .screenshot-hint {
             text-align: center;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: bold;
-            color: var(--text-dark);
-            margin: 0;
+            color: #ffffff;
+            margin: 0 0 15px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* 加上陰影讓字更清楚 */
         }
 
-        /* 隱藏滾動條 */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
@@ -373,8 +375,8 @@
     <button class="share-btn" id="share-btn" onclick="generateScreenshot()">生成紀錄圖片</button>
 </div>
 
-<div id="formulaModal" class="modal">
-    <div class="modal-content">
+<div id="formulaModal" class="modal" onclick="closeModal('formulaModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeModal('formulaModal')">&times;</span>
         <h3>Jackson-Pollock 3點法</h3>
         
@@ -396,8 +398,8 @@
     </div>
 </div>
 
-<div id="tutorialModal" class="modal">
-    <div class="modal-content">
+<div id="tutorialModal" class="modal" onclick="closeModal('tutorialModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeModal('tutorialModal')">&times;</span>
         <h3>體脂夾測量教學</h3>
         
@@ -422,11 +424,14 @@
     </div>
 </div>
 
-<div id="screenshotModal" class="modal">
-    <div class="modal-content" style="background-color: transparent; box-shadow: none; padding: 10px;">
-        <span class="close-modal" style="color: #fff; top: -30px; right: 10px;" onclick="closeModal('screenshotModal')">&times;</span>
+<div id="screenshotModal" class="modal" onclick="closeModal('screenshotModal')">
+    <div class="modal-content" style="background-color: transparent; box-shadow: none; padding: 10px; text-align: center;" onclick="event.stopPropagation()">
         <img id="screenshot-result" src="" alt="體脂紀錄">
-        <p class="screenshot-hint" style="color: #fff;">⬆️ 請長按上方圖片進行儲存或分享 ⬆️</p>
+        <p class="screenshot-hint">⬆️ 請長按上方圖片進行儲存或分享 ⬆️</p>
+        
+        <button onclick="closeModal('screenshotModal')" style="padding: 12px 30px; background-color: #FFFFFF; color: var(--text-dark); border: none; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 80%; max-width: 200px;">
+            完成並關閉
+        </button>
     </div>
 </div>
 
@@ -434,7 +439,6 @@
     let currentGender = 'male';
     const container = document.getElementById('app-container');
 
-    // 設定今天的日期
     function setTodayDate() {
         const today = new Date();
         const yyyy = today.getFullYear();
@@ -488,7 +492,7 @@
         
         document.getElementById('result-value').innerText = '-- %';
         document.getElementById('bd-value').innerText = '--';
-        document.getElementById('share-btn').style.display = 'none'; // 切換性別時隱藏截圖按鈕
+        document.getElementById('share-btn').style.display = 'none'; 
     }
 
     function calculateBodyFat() {
@@ -515,53 +519,40 @@
         if (bodyFat < 2) bodyFat = 2.0; 
         if (bodyFat > 60) bodyFat = 60.0;
 
-        setTodayDate(); // 確保日期是最新
+        setTodayDate(); 
         document.getElementById('result-value').innerText = bodyFat.toFixed(1) + ' %';
         document.getElementById('bd-value').innerText = bodyDensity.toFixed(4);
         
-        // 顯示生成圖片按鈕
         document.getElementById('share-btn').style.display = 'block';
-
         document.activeElement.blur();
     }
 
-    // Modal 控制函數
     function openModal(modalId) {
         document.getElementById(modalId).style.display = "flex";
     }
+    
     function closeModal(modalId) {
         document.getElementById(modalId).style.display = "none";
     }
 
-    // 點擊背景關閉 Modal
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = "none";
-        }
-    }
-
-    // 生成截圖功能
     function generateScreenshot() {
         const shareBtn = document.getElementById('share-btn');
         const calcBtn = document.getElementById('calc-btn');
         const actionBtns = document.getElementById('action-buttons');
         
-        // 截圖前暫時隱藏按鈕，讓圖片更乾淨
         shareBtn.style.display = 'none';
         calcBtn.style.display = 'none';
         actionBtns.style.display = 'none';
 
         html2canvas(container, {
-            scale: 3, // 提高圖片解析度
+            scale: 3, 
             backgroundColor: '#FFFFFF',
             borderRadius: 20
         }).then(canvas => {
-            // 截圖完成後恢復按鈕顯示
             shareBtn.style.display = 'block';
             calcBtn.style.display = 'block';
             actionBtns.style.display = 'flex';
 
-            // 將 canvas 轉為圖片網址，並顯示在 Modal 內供使用者長按儲存
             const imgUrl = canvas.toDataURL("image/png");
             document.getElementById('screenshot-result').src = imgUrl;
             openModal('screenshotModal');
