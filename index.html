@@ -92,14 +92,13 @@
             transform: scale(0.95);
         }
 
-        /* TDEE按鈕專屬樣式 (配合旁邊的虛線風格) */
         .tdee-btn {
             border: 1px dashed var(--tdee-orange) !important;
             color: var(--tdee-orange) !important;
         }
         
         .tdee-btn:active {
-            background-color: #FFF2E8 !important; /* 淡橘色背景 */
+            background-color: #FFF2E8 !important; 
         }
 
         .input-grid {
@@ -149,7 +148,6 @@
             background-color: var(--focus-bg);
         }
 
-        /* TDEE 獨立輸入框聚焦顏色 */
         .tdee-input:focus, .tdee-select:focus {
             border-color: var(--tdee-orange) !important;
             background-color: #FFF2E8 !important;
@@ -181,7 +179,6 @@
             color: #FFFFFF;
         }
 
-        /* TDEE專屬性別按鈕樣式 */
         .tdee-gender-btn.active {
             background-color: var(--tdee-orange) !important;
             border-color: var(--tdee-orange) !important;
@@ -252,6 +249,16 @@
             position: relative;
         }
 
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            color: var(--text-gray);
+            font-size: 26px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         .modal-text-block {
             font-size: 13px;
             line-height: 1.6;
@@ -259,6 +266,19 @@
             padding: 14px;
             border-radius: 12px;
             margin-bottom: 12px;
+        }
+
+        /* TDEE 摘要標籤 */
+        .tdee-summary {
+            background-color: var(--bg-main);
+            color: var(--text-gray);
+            font-size: 13px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 0.5px;
         }
 
         .tdee-result-card {
@@ -282,7 +302,25 @@
         .advice-orange { border-left-color: #FF7401; }
         .advice-red { border-left-color: #FF3B30; background: #FFF2F2; }
 
-        .advice-card h4 { margin: 0 0 4px 0; font-size: 14px; }
+        /* 純文字小徽章設計 */
+        .text-badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 4px;
+            vertical-align: text-bottom;
+        }
+        .badge-green { background-color: #5ED18D; }
+        .badge-orange { background-color: #FF7401; }
+        .badge-red { background-color: #FF3B30; }
+
+        .advice-card h4 { margin: 0 0 4px 0; font-size: 14px; display: flex; align-items: center; }
         .advice-card p { margin: 0; font-size: 12px; color: #666; line-height: 1.4; }
 
         .share-btn {
@@ -345,47 +383,43 @@
     </div>
     
     <button class="share-btn" id="share-btn" onclick="generateScreenshot()" disabled>生成紀錄圖片</button>
-    <div class="app-version">Jackson-Pollock 3點法 · v1.2.0</div>
+    <div class="app-version">Jackson-Pollock 3點法 · v1.3.0</div>
 </div>
 
 <div id="tdeeModal" class="modal" onclick="closeModal('tdeeModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeModal('tdeeModal')">&times;</span>
         <h3 style="margin-top:0; color: var(--text-dark);">TDEE / BMR 計算機</h3>
         
-        <div class="gender-selector" style="margin-bottom: 15px;">
-            <div class="gender-btn tdee-gender-btn active" onclick="setTdeeGender('male')" id="tdee-btn-male">男性</div>
-            <div class="gender-btn tdee-gender-btn" onclick="setTdeeGender('female')" id="tdee-btn-female">女性</div>
+        <div id="tdee-input-view">
+            <div class="gender-selector" style="margin-bottom: 15px;">
+                <div class="gender-btn tdee-gender-btn active" onclick="setTdeeGender('male')" id="tdee-btn-male">男性</div>
+                <div class="gender-btn tdee-gender-btn" onclick="setTdeeGender('female')" id="tdee-btn-female">女性</div>
+            </div>
+
+            <div class="input-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 15px;">
+                <div class="form-group"><label>年齡</label><input type="number" id="tdee-age" class="tdee-input" placeholder="歲"></div>
+                <div class="form-group"><label>身高</label><input type="number" id="tdee-height" class="tdee-input" placeholder="公分"></div>
+                <div class="form-group"><label>體重</label><input type="number" id="tdee-weight" class="tdee-input" placeholder="公斤"></div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>日常活動量</label>
+                <select id="activity" class="tdee-select">
+                    <option value="1.2">久坐族 (幾乎不運動)</option>
+                    <option value="1.375">輕度 (每週運動1-3天)</option>
+                    <option value="1.55">中度 (每週運動3-5天)</option>
+                    <option value="1.725">高度 (每週運動6-7天)</option>
+                    <option value="1.9">極高度 (高強度勞動)</option>
+                </select>
+            </div>
+
+            <button class="calculate-btn" style="width:100%; background-color: var(--tdee-orange);" onclick="calculateTdee()">計算熱量需求</button>
         </div>
 
-        <div class="input-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 15px;">
-            <div class="form-group">
-                <label>年齡</label>
-                <input type="number" id="tdee-age" class="tdee-input" placeholder="歲">
-            </div>
-            <div class="form-group">
-                <label>身高</label>
-                <input type="number" id="tdee-height" class="tdee-input" placeholder="公分">
-            </div>
-            <div class="form-group">
-                <label>體重</label>
-                <input type="number" id="tdee-weight" class="tdee-input" placeholder="公斤">
-            </div>
-        </div>
+        <div id="tdee-results-view" style="display: none;">
+            <div class="tdee-summary" id="tdee-summary-text">--</div>
 
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label>日常活動量</label>
-            <select id="activity" class="tdee-select">
-                <option value="1.2">久坐族 (幾乎不運動)</option>
-                <option value="1.375">輕度 (每週運動1-3天)</option>
-                <option value="1.55">中度 (每週運動3-5天)</option>
-                <option value="1.725">高度 (每週運動6-7天)</option>
-                <option value="1.9">極高度 (高強度勞動)</option>
-            </select>
-        </div>
-
-        <button class="calculate-btn" style="width:100%; margin-bottom: 20px; background-color: var(--tdee-orange);" onclick="calculateTdee()">計算熱量需求</button>
-
-        <div id="tdee-results" style="display: none;">
             <div class="tdee-result-card">
                 <div style="font-size: 12px; color: var(--text-gray); font-weight: bold;">您的每日總消耗熱量 (TDEE)</div>
                 <div id="tdee-val" style="font-size: 34px; font-weight: 900; color: var(--tdee-orange); margin: 5px 0;">--</div>
@@ -393,23 +427,46 @@
             </div>
 
             <div class="advice-card advice-green">
-                <h4>🍏 溫和減脂 (推薦)</h4>
+                <h4><span class="text-badge badge-green">★</span> 溫和減脂 (推薦)</h4>
                 <p id="target-mild-text">--</p>
             </div>
             <div class="advice-card advice-orange">
-                <h4>🔥 強力減脂</h4>
+                <h4><span class="text-badge badge-orange">●</span> 強力減脂</h4>
                 <p id="target-fast-text">--</p>
             </div>
             <div class="advice-card advice-red">
-                <h4>🚨 絕對警告：低於 BMR</h4>
+                <h4><span class="text-badge badge-red">!</span> 絕對警告：低於 BMR</h4>
                 <p>切勿長期攝取低於 <strong style="color:#FF3B30;"><span id="bmr-warn">--</span> kcal</strong>。<br>會導致代謝適應停滯、肌肉嚴重流失。</p>
             </div>
+
+            <div class="action-row" style="margin-top: 15px;">
+                <button class="calculate-btn" style="flex:1; background-color: var(--bg-main); color: var(--text-gray); border: 1px solid var(--border-light); font-size: 15px;" onclick="resetTdeeView()">回TDEE計算</button>
+                <button class="calculate-btn" style="flex:1; background-color: var(--primary-color); font-size: 15px;" onclick="closeModal('tdeeModal')">回體脂肪計算</button>
+            </div>
         </div>
+
     </div>
 </div>
 
-<div id="formulaModal" class="modal" onclick="closeModal('formulaModal')"><div class="modal-content" onclick="event.stopPropagation()"><h3>公式</h3><div class="modal-text-block"><span>BD (男):</span> 1.10938 - (0.0008267*S) + (0.0000016*S²) - (0.0002574*Age)</div><div class="modal-text-block"><span>BD (女):</span> 1.0994921 - (0.0009929*S) + (0.0000023*S²) - (0.0001392*Age)</div><div class="modal-text-block"><span>Siri公式:</span> BF% = (4.95/BD - 4.50) * 100</div></div></div>
-<div id="tutorialModal" class="modal" onclick="closeModal('tutorialModal')"><div class="modal-content" onclick="event.stopPropagation()"><h3>測量教學</h3><div class="modal-text-block"><span>★ 技巧:</span> 捏起皮下脂肪，在夾子尖端等待2秒讀數。</div><div id="tutorial-male" class="modal-text-block"><span>男:</span> 胸部(斜)、腹部(垂)、大腿(垂)</div><div id="tutorial-female" class="modal-text-block" style="display:none"><span>女:</span> 三頭肌(垂)、髂骨上(斜)、大腿(垂)</div></div></div>
+<div id="formulaModal" class="modal" onclick="closeModal('formulaModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeModal('formulaModal')">&times;</span>
+        <h3>公式</h3>
+        <div class="modal-text-block"><span>BD (男):</span> 1.10938 - (0.0008267*S) + (0.0000016*S²) - (0.0002574*Age)</div>
+        <div class="modal-text-block"><span>BD (女):</span> 1.0994921 - (0.0009929*S) + (0.0000023*S²) - (0.0001392*Age)</div>
+        <div class="modal-text-block"><span>Siri公式:</span> BF% = (4.95/BD - 4.50) * 100</div>
+    </div>
+</div>
+
+<div id="tutorialModal" class="modal" onclick="closeModal('tutorialModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeModal('tutorialModal')">&times;</span>
+        <h3>測量教學</h3>
+        <div class="modal-text-block"><span>注意事項:</span> 捏起皮下脂肪，在夾子尖端等待2秒讀數。</div>
+        <div id="tutorial-male" class="modal-text-block"><span>男:</span> 胸部(斜)、腹部(垂)、大腿(垂)</div>
+        <div id="tutorial-female" class="modal-text-block" style="display:none"><span>女:</span> 三頭肌(垂)、髂骨上(斜)、大腿(垂)</div>
+    </div>
+</div>
 
 <script>
     let currentGender = 'male';
@@ -424,7 +481,6 @@
     }
     setTodayDate();
 
-    // 體脂計的性別切換
     function setGender(gender) {
         currentGender = gender;
         document.body.className = (gender === 'female') ? 'theme-female' : '';
@@ -436,14 +492,12 @@
         document.getElementById('tutorial-female').style.display = (gender === 'female') ? 'block' : 'none';
     }
 
-    // TDEE 工具獨立的性別切換
     function setTdeeGender(gender) {
         tdeeGender = gender;
         document.getElementById('tdee-btn-male').classList.toggle('active', gender === 'male');
         document.getElementById('tdee-btn-female').classList.toggle('active', gender === 'female');
     }
 
-    // 計算體脂
     function calculateBodyFat() {
         const age = parseFloat(document.getElementById('age').value);
         const s1 = parseFloat(document.getElementById('site1').value);
@@ -461,7 +515,6 @@
         document.activeElement.blur();
     }
 
-    // 計算 TDEE 與生成具體缺口建議
     function calculateTdee() {
         const age = parseFloat(document.getElementById('tdee-age').value);
         const h = parseFloat(document.getElementById('tdee-height').value);
@@ -470,42 +523,51 @@
 
         if (isNaN(age) || isNaN(h) || isNaN(w)) return alert("請完整填寫年齡、身高與體重！");
 
-        // Mifflin-St Jeor 方程式 (區分男女)
         let bmr = (tdeeGender === 'male') ?
             (10 * w) + (6.25 * h) - (5 * age) + 5 :
             (10 * w) + (6.25 * h) - (5 * age) - 161;
 
         let tdee = bmr * act;
 
-        // 顯示結果
-        document.getElementById('tdee-results').style.display = 'block';
+        // 更新摘要列
+        const genderText = (tdeeGender === 'male') ? '男性' : '女性';
+        document.getElementById('tdee-summary-text').innerText = `${genderText} · ${age}歲 · ${h}cm · ${w}kg`;
+
+        // 顯示計算結果數值
         document.getElementById('tdee-val').innerText = Math.round(tdee) + ' kcal';
         document.getElementById('bmr-val').innerText = Math.round(bmr);
         
-        // 生成具體減重建議字串 (7700大卡 = 1公斤脂肪)
         let mildTarget = Math.round(tdee - 300);
-        let mildWeightLoss = ((300 * 7) / 7700).toFixed(1); // 一週減重預期
+        let mildWeightLoss = ((300 * 7) / 7700).toFixed(1); 
         document.getElementById('target-mild-text').innerHTML = 
-            `目標熱量: <strong>${mildTarget} kcal</strong><br>每日 300 大卡熱量缺口，一週約減 ${mildWeightLoss} kg`;
+            `目標熱量: <strong>${mildTarget} kcal</strong><br>每日 300 大卡缺口，一週約減 ${mildWeightLoss} kg`;
 
         let fastTarget = Math.round(tdee - 500);
-        let fastWeightLoss = ((500 * 7) / 7700).toFixed(1); // 一週減重預期
+        let fastWeightLoss = ((500 * 7) / 7700).toFixed(1); 
         document.getElementById('target-fast-text').innerHTML = 
-            `目標熱量: <strong>${fastTarget} kcal</strong><br>每日 500 大卡熱量缺口，一週約減 ${fastWeightLoss} kg`;
+            `目標熱量: <strong>${fastTarget} kcal</strong><br>每日 500 大卡缺口，一週約減 ${fastWeightLoss} kg`;
 
         document.getElementById('bmr-warn').innerText = Math.round(bmr);
-        document.activeElement.blur();
+        
+        // 切換視圖
+        document.getElementById('tdee-input-view').style.display = 'none';
+        document.getElementById('tdee-results-view').style.display = 'block';
+    }
+
+    function resetTdeeView() {
+        document.getElementById('tdee-results-view').style.display = 'none';
+        document.getElementById('tdee-input-view').style.display = 'block';
     }
 
     function openModal(id) { document.getElementById(id).style.display = "flex"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
     
-    // 開啟 TDEE 彈窗時，自動把體脂計如果有填寫的「年齡」帶過來，增加方便性
     function openTdeeModal() { 
         const mainAge = document.getElementById('age').value;
         if(mainAge && !document.getElementById('tdee-age').value) {
             document.getElementById('tdee-age').value = mainAge;
         }
+        resetTdeeView(); // 每次打開確保在輸入區
         openModal('tdeeModal'); 
     }
 
